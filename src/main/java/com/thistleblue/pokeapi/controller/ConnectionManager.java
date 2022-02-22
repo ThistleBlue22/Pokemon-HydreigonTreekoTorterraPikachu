@@ -34,18 +34,21 @@ public class ConnectionManager {
             JSONParser jsonParser = new JSONParser();
             JSONObject jsonObject = (JSONObject) jsonParser.parse(responseBody);
 
-//            String pokemonType = pokemonType(sb, jsonObject);
-//            sb.delete(0, sb.length());
-//
-//            String pokemonStats = pokemonStats(sb, jsonObject);
-//            sb.delete(0, sb.length());
+            String pokemonType = pokemonType(sb, jsonObject);
+            sb.delete(0, sb.length());
+
+            String pokemonStats = pokemonStats(sb, jsonObject);
+            sb.delete(0, sb.length());
 
             String pokemonAbilities = pokemonAbilities(sb, jsonObject);
 
 
 
-//            Pokemon pokemon = new Pokemon(jsonObject.get("id"), jsonObject.get("name"),
-//                    jsonObject.get("height"), jsonObject.get("weight"), pokemonType, );
+            Pokemon pokemon = new Pokemon(Math.toIntExact((Long) jsonObject.get("id")), (String) jsonObject.get("name"),
+                    Math.toIntExact((Long) jsonObject.get("height")), Math.toIntExact((Long) jsonObject.get("weight")),
+                    pokemonType, pokemonStats, pokemonAbilities);
+
+            System.out.println(pokemon);
         } catch (IOException | InterruptedException | ParseException e) {
             e.printStackTrace();
         }
@@ -57,7 +60,6 @@ public class ConnectionManager {
 
     private static String pokemonType(StringBuilder sb, JSONObject jsonObject) {
         JSONArray jsonArray = (JSONArray) jsonObject.get("types");
-        sb.append("Types: ");
 
         for (int i = 0; i < jsonArray.size(); i++){
             JSONObject jsonObject1 = (JSONObject) jsonArray.get(i);
@@ -66,15 +68,14 @@ public class ConnectionManager {
             if (i < jsonArray.size()-1){
                 sb.append(", ");
             }
-            else
-                sb.append(".");
+
         }
         return sb.toString();
     }
 
     private static String pokemonStats(StringBuilder sb, JSONObject jsonObject) {
         JSONArray jsonArray = (JSONArray) jsonObject.get("stats");
-        sb.append("Stats: [");
+        sb.append("[");
 
         for (int i = 0; i < jsonArray.size(); i++){
             JSONObject jsonObject1 = (JSONObject) jsonArray.get(i);
@@ -83,8 +84,6 @@ public class ConnectionManager {
             if (i < jsonArray.size()-1){
                 sb.append(", ");
             }
-            else
-                sb.append(".");
         }
 
         sb.append("]");
@@ -92,14 +91,24 @@ public class ConnectionManager {
     }
 
     private static String pokemonAbilities(StringBuilder sb, JSONObject jsonObject) {
-        JSONArray jsonArray = (JSONArray) jsonObject.get("stats");
-        sb.append("Stats: [");
+        JSONArray jsonArray = (JSONArray) jsonObject.get("abilities");
+        sb.append("[");
+        String isHidden;
         for (int i = 0; i < jsonArray.size(); i++) {
             JSONObject jsonObject1 = (JSONObject) jsonArray.get(i);
+            JSONObject jsonObject2 = (JSONObject) jsonObject1.get("ability");
 
+            if (jsonObject1.get("is_hidden").toString().contains("true"))
+                isHidden = "This is a hidden ability";
+            else
+                isHidden = "This is not a hidden ability";
 
+            sb.append(jsonObject2.get("name")).append(" (").append(isHidden).append(")");
+
+            if (i < jsonArray.size()-1){
+                sb.append(", ");
+            }
         }
-
 
         sb.append("]");
         return sb.toString();
